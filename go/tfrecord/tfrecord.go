@@ -2,7 +2,9 @@
 // TFRecords files.  A TFRecords file represents a sequence of
 // (binary) strings. The format is not random access, so it is
 // suitable for streaming large amounts of data but not suitable if
-// fast sharding or other non-sequential access is desired.
+// fast sharding or other non-sequential access is desired. For more
+// information, please refer to
+// https://www.tensorflow.org/versions/master/api_docs/python/python_io.html#tfrecords-format-details.
 package tfrecord
 
 import (
