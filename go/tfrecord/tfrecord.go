@@ -1,4 +1,18 @@
-// A TFRecords file contains a sequence of strings with CRC
+// Package tfrecords provides facilities for reading and writing
+// TFRecords files.  A TFRecords file represents a sequence of
+// (binary) strings. The format is not random access, so it is
+// suitable for streaming large amounts of data but not suitable if
+// fast sharding or other non-sequential access is desired.
+package tfrecord
+
+import (
+	"encoding/binary"
+	"errors"
+	"hash/crc32"
+	"io"
+)
+
+//A TFRecords file contains a sequence of strings with CRC
 // hashes. Each record has the format
 //
 //     uint64 length
@@ -13,14 +27,6 @@
 //
 // For more information, please refer to
 // https://www.tensorflow.org/versions/master/api_docs/python/python_io.html#tfrecords-format-details.
-package tfrecord
-
-import (
-	"encoding/binary"
-	"errors"
-	"hash/crc32"
-	"io"
-)
 
 // maskDelta is a magic number taken from
 // https://github.com/tensorflow/tensorflow/blob/754048a0453a04a761e112ae5d99c149eb9910dd/tensorflow/core/lib/hash/crc32c.h#L33.
@@ -57,7 +63,7 @@ func crc32Hash(data []byte) uint32 {
 	return crc32.Checksum(data, crc32Table)
 }
 
-// WriteRecord writes the provided data as a Record to w.
+// Write writes the provided data as a record to w.
 func Write(w io.Writer, data []byte) error {
 
 	var (
@@ -85,7 +91,7 @@ func Write(w io.Writer, data []byte) error {
 	return nil
 }
 
-// ReadRecord reads one record from r.
+// Read reads one record from r.
 func Read(r io.Reader) (data []byte, err error) {
 	var (
 		length         uint64
