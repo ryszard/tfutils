@@ -1,3 +1,5 @@
+// package example gives you some syntactic sugar to build
+// tensorflow.Example protobufs in a more intuitive way.
 package example
 
 import (
@@ -6,70 +8,80 @@ import (
 	tensorflow "github.com/ryszard/tfutils/proto/tensorflow/core/example"
 )
 
-func New(values map[string]interface{}) *tensorflow.Example {
-	features := make(map[string]*tensorflow.Feature)
-	for k, v := range values {
+// New builds and returns am Example protobuf based on the contents of
+// features. The values of features will be massaged to work: single
+// values will be turned into one element slices. Supported types:
+// byte, string (converted to []byte), float32, int64, int (converted
+// to int64), slices of supported types, and *tensorflow.Feature (this
+// is an escape hatch).
+//
+// This function will panic if you pass it an unsupported type.
+func New(features map[string]interface{}) *tensorflow.Example {
+	result := make(map[string]*tensorflow.Feature)
+	for k, v := range features {
 		switch t := v.(type) {
 		case []byte:
-			features[k] = Bytes(t)
+			result[k] = toBytes(t)
 		case [][]byte:
-			features[k] = BytesList(t)
+			result[k] = toBytesList(t)
 		case string:
-			features[k] = Bytes([]byte(t))
+			result[k] = toBytes([]byte(t))
 		case []string:
 			b := make([][]byte, len(t))
 			for i, s := range t {
 				b[i] = []byte(s)
 			}
-			features[k] = BytesList(b)
+			result[k] = toBytesList(b)
 		case float32:
-			features[k] = Float(t)
+			result[k] = toFloat(t)
 		case []float32:
-			features[k] = FloatList(t)
+			result[k] = toFloatList(t)
 		case int64:
-			features[k] = Int64(t)
+			result[k] = toInt64(t)
 		case []int64:
-			features[k] = Int64List(t)
+			result[k] = toInt64List(t)
 		case int:
-			features[k] = Int64(int64(t))
+			result[k] = toInt64(int64(t))
 		case []int:
 			ints := make([]int64, len(t))
 			for i, ii := range t {
 				ints[i] = int64(ii)
 			}
-			features[k] = Int64List(ints)
+			result[k] = toInt64List(ints)
+		case *tensorflow.Feature:
+			result[k] = t
 		default:
 			panic(fmt.Sprintf("example: unsupported feature type %T: %q", t, t))
 		}
 	}
 	return &tensorflow.Example{
-		Features: &tensorflow.Features{features},
+		Features: &tensorflow.Features{result},
 	}
 }
 
-func Bytes(value []byte) *tensorflow.Feature {
+func toBytes(value []byte) *tensorflow.Feature {
 	values := [][]byte{value}
 	return &tensorflow.Feature{&tensorflow.Feature_BytesList{&tensorflow.BytesList{values}}}
 }
 
-func BytesList(values [][]byte) *tensorflow.Feature {
+func toBytesList(values [][]byte) *tensorflow.Feature {
 	return &tensorflow.Feature{&tensorflow.Feature_BytesList{&tensorflow.BytesList{values}}}
 }
 
-func Float(value float32) *tensorflow.Feature {
+func toFloat(value float32) *tensorflow.Feature {
 	values := []float32{value}
 	return &tensorflow.Feature{&tensorflow.Feature_FloatList{&tensorflow.FloatList{values}}}
 }
 
-func FloatList(values []float32) *tensorflow.Feature {
+func toFloatList(values []float32) *tensorflow.Feature {
 	return &tensorflow.Feature{&tensorflow.Feature_FloatList{&tensorflow.FloatList{values}}}
 }
 
-func Int64(value int64) *tensorflow.Feature {
+func toInt64(value int64) *tensorflow.Feature {
 	values := []int64{value}
 	return &tensorflow.Feature{&tensorflow.Feature_Int64List{&tensorflow.Int64List{values}}}
 }
 
-func Int64List(values []int64) *tensorflow.Feature {
+func toInt64List(values []int64) *tensorflow.Feature {
 	return &tensorflow.Feature{&tensorflow.Feature_Int64List{&tensorflow.Int64List{values}}}
 }

@@ -1,6 +1,10 @@
 package example
 
-import "testing"
+import (
+	"testing"
+
+	tensorflow "github.com/ryszard/tfutils/proto/tensorflow/core/example"
+)
 
 func TestExample(t *testing.T) {
 	_ = New(map[string]interface{}{
@@ -12,5 +16,6 @@ func TestExample(t *testing.T) {
 		"float32 list": []float32{11},
 		"int64":        12,
 		"int64 list":   []int64{13},
+		"feature":      &tensorflow.Feature{&tensorflow.Feature_BytesList{&tensorflow.BytesList{[][]byte{[]byte{byte(1)}}}}},
 	})
 }
