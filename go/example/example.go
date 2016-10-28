@@ -3,7 +3,7 @@ package example
 import (
 	"fmt"
 
-	tensorflow "github.com/ryszard/tfrecord/proto/tensorflow/core/example"
+	tensorflow "github.com/ryszard/tfutils/proto/tensorflow/core/example"
 )
 
 func New(values map[string]interface{}) *tensorflow.Example {
