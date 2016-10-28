@@ -14,7 +14,7 @@ import (
 	"io"
 )
 
-//A TFRecords file contains a sequence of strings with CRC
+// A TFRecords file contains a sequence of strings with CRC
 // hashes. Each record has the format
 //
 //     uint64 length
